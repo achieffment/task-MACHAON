@@ -192,7 +192,6 @@ class Link {
         return "<a href='$link'>{$link}</a>";
     }
 
-    // Получение ссылки по короткой и редирект на неё
     public function getLinkAndRedirect($shortLink) {
         $query = "SELECT link FROM {$this->$table_names['links']} WHERE short_link = '{$shortLink}'";
         $result = $this->db_conn->query($query);
