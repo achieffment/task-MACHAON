@@ -193,7 +193,7 @@ class Link {
     }
 
     public function getLinkAndRedirect($shortLink) {
-        $query = "SELECT link FROM {$this->$table_names['links']} WHERE short_link = '{$shortLink}'";
+        $query = "SELECT link FROM {$this->table_names['links']} WHERE short_link = '{$shortLink}'";
         $result = $this->db_conn->query($query);
         if ($result) {
             $result = $result->fetch_assoc();
