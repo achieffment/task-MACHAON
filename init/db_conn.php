@@ -2,9 +2,9 @@
     session_start();
 
     // Редирект нужен, для локалки опенсервера, т.к. вставляет путь к диску, который заменяю
-    $redirect_location = $_SERVER["DOCUMENT_ROOT"];
-    if ($redirect_location[1] == ":")
-        $redirect_location = "http://" . $_SERVER["HTTP_HOST"] . "/";
+    $redirectLink = $server_path = $_SERVER["DOCUMENT_ROOT"];
+    if ($redirectLink[1] == ":")
+        $redirectLink = "http://" . $_SERVER["HTTP_HOST"] . "/";
 
     $db_hostname = "localhost";
     $db_login    = "root";

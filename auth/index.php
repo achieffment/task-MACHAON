@@ -1,4 +1,5 @@
 <?php require_once $_SERVER["DOCUMENT_ROOT"] . "/init/db_conn.php"; ?>
+<?php require_once $server_path . "/classes/auth.php"; ?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -8,115 +9,62 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Authorization</title>
     <link rel="stylesheet" href="/assets/css/style.css">
-    <style>
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-    </style>
+    <link rel="stylesheet" href="/assets/css/auth.css">
 </head>
 <body>
     <?php
+        $auth = new Auth($table_names, $db_conn, $redirectLink);
         if (isset($_GET["logout"]) && $_GET["logout"]) {
-            unset($_SESSION["auth"]);
-            echo "<p class='text-success'>Вы вышли из личного кабинета</p>";
+            $auth->logout();
         } else {
             if (isset($_SESSION["auth"]) && $_SESSION["auth"] && !isset($_GET["list"])) {
-                header("Location: " . $redirect_location);
+                header("Location: " . $redirectLink);
             }
         }
-        if (!isset($_GET["list"])): ?>
-            <div class="auth-form-container">
-                <form action="/auth/index.php" method="post">
-                    <p>Логин: <input required type="text" name="login"></p>
-                    <p>Пароль: <input required type="password" name="password"></p>
-                    <input type="hidden" name="registry" value="<?=(isset($_GET["registry"]) ? $_GET["registry"] : "")?>">
-                    <p><input type="submit"></p>
-                </form>
-            </div>
-        <?php else: ?>
-            <?php
-                $query = "SELECT id, login FROM {$table_names['admins']}";
-                $result = $db_conn->query($query);
-                if ($result) {
-                    if ($result->num_rows > 0) {
-                        $admins = [];
-                        while ($row = $result->fetch_assoc()) {
-                            $admins[] = $row;
-                        } ?>
-                        <a style="width: 180px; margin: 15px;" class="button" href="/">Обратно</a>
-                        <table style="width: 50%;">
-                            <thead>
-                                <th>id</th>
-                                <th>login</th>
-                            </thead>
-                            <tbody>
-                                <?php foreach ($admins as $admin): ?>
-                                    <tr>
-                                        <td><?=$admin["id"]?></td>
-                                        <td><?=$admin["login"]?></td>
-                                    </tr>
-                                <?php endforeach; ?>
-                            </tbody>
-                        </table>
-                    <?php } else {
-                        echo "<p>Нет пользователей с правами администратора.</p>";
-                    }
-                } else
-                    echo "<p>Возникла ошибка при обработке запроса к бд: " . $db_conn->error . "</p>"
-            ?>
-        <?php endif; ?>
-    <?php
-        if (isset($_POST["login"]) && $_POST["login"]) {
-            $login = htmlspecialchars(strip_tags($_POST["login"]));
-            if (!$login)
-                echo "<p class='text-error'>Логин задан не верно или пуст!</p>";
-            else if (strlen($login) > 32)
-                echo "<p class='text-error'>Логин не может превышать 32 символа!</p>";
-            else {
-                if (isset($_POST["password"]) && $_POST["password"]) {
-                    $password = htmlspecialchars(strip_tags($_POST["password"]));
-                    if (!$password)
-                        echo "<p class='text-error'>Пароль задан не верно или пуст!</p>";
-                    else if (strlen($password) > 32)
-                        echo "<p class='text-error'>Пароль не может превышать 32 символа!</p>";
-                    else {
-                        $password = md5($password);
-                        if (isset($_POST["registry"]) && $_POST["registry"]) {
-                            $query = "SELECT id FROM {$table_names["admins"]} WHERE login = '{$login}'";
-                            $result = $db_conn->query($query);
-                            if (!$result)
-                                echo "Error with authorization system: " . $db_conn->error;
-                            else if ($result->num_rows > 0)
-                                echo "<p class='text-error'>Такой логин уже используется!</p>";
-                            else {
-                                $query = "INSERT INTO {$table_names["admins"]} (`login`, `password`) VALUES('{$login}', '{$password}')";
-                                $result = $db_conn->query($query);
-                                if (!$result)
-                                    echo "<p class='text-error'>You are authorized successfully!</p>";
-                                else {
-                                    $_SESSION["auth"] = $login;
-                                    echo "<p class='text-error'>You are registered successfully!</p>";
-                                    header("Location: " . $redirect_location);
-                                }
-                            }
-                        } else {
-                            $query = "SELECT login FROM {$table_names["admins"]} WHERE login = '{$login}' AND password = '{$password}'";
-                            $result = $db_conn->query($query);
-                            if (!$result)
-                                echo "Error with authorization system: " . $db_conn->error;
-                            else if ($result->num_rows > 0) {
-                                $_SESSION["auth"] = $login;
-                                echo "<p class='text-error'>You are authorized successfully!</p>";
-                                header("Location: " . $redirect_location);
-                            } else
-                                echo "<p class='text-error'>Логин или пароль не верны!</p>";
+    ?>
+    <div class="auth-form-container">
+        <?php
+        if (isset($_GET["registry"]) || (isset($_POST["registry"]) && $_POST["registry"]))
+            echo "<h1>Регистрация</h1>";
+        else
+            echo "<h1>Авторизация</h1>";
+        ?>
+        <form action="/auth/index.php<?=(isset($_GET["registry"]) ? "?registry" : "")?>" method="post">
+            <p>Логин: <input required type="text" name="login"></p>
+            <p>Пароль: <input required type="password" name="password"></p>
+            <p><input type="submit"></p>
+        </form>
+        <?php
+            if ($auth->response["message"])
+                echo $auth->returnRespone();
+            if (isset($_POST["login"]) && $_POST["login"]) {
+                $login = $auth->validate($_POST["login"], "логин");
+                if ($login === false)
+                    echo $auth->returnRespone();
+                else {
+                    if (isset($_POST["password"]) && $_POST["password"]) {
+                        $password = $auth->validate($_POST["login"], "логин");
+                        if ($password === false)
+                            echo $auth->returnRespone();
+                        else {
+                            $password = md5($password);
+                            if (isset($_GET["registry"]))
+                                $auth->registry($login, $password);
+                            else
+                                $auth->authorize($login, $password);
+                            echo $auth->returnRespone();
                         }
                     }
                 }
             }
-        }
-    ?>
+        ?>
+        <a class="button" href="/">Вернуться</a>
+        <hr>
+        <?php if (!isset($_GET["registry"])): ?>
+            <a class="button" href="/auth/?registry">Зарегистрироваться</a>
+        <?php else: ?>
+            <a class="button" href="/auth/">Авторизоваться</a>
+        <?php endif; ?>
+    </div>
 </body>
 </html>
