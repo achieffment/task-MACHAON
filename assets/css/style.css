@@ -1,0 +1,100 @@
+html, body {
+    margin: 0;
+}
+header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #a8b7e0;
+    min-height: 100px;
+    flex-wrap: wrap;
+    padding: 15px 0;
+}
+.auth-form-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    width: 100vw;
+    height: 100vh;
+}
+.text-error, .text-success {
+    position: absolute;
+    top: 0;
+    width: 100%;
+    text-align: center;
+    font-size: 24px;
+}
+.text-error {
+    color: red;
+}
+.text-success {
+    color: green;
+}
+section {
+    width: 100%;
+    box-sizing: border-box;
+    min-height: 300px;
+    padding: 10vh 30vw;
+}
+.w-100 {
+    width: 100%;
+}
+header p {
+    text-align: center;
+}
+header p .button {
+    margin-top: 15px;
+    margin-bottom: 0px;
+}
+.header-buttons-container {
+    display: flex;
+    justify-content: center;
+}
+.button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: #36a1ff;
+    min-width: 180px;
+    height: 50px;
+    border-radius: 3px;
+    margin: 0 10px;
+    text-decoration: none;
+    transition: all 0.3s ease-in-out;
+    margin-bottom: 10px;
+}
+.button:hover {
+    background-color: #6dd9ff;
+}
+.button:visited {
+    color: black;
+}
+table {
+    border-collapse: collapse;
+    width: 100%;
+}
+th {
+    border: 1px solid black;
+}
+.pointer {
+    cursor: pointer;
+}
+th:hover {
+    background-color: #adadad;
+}
+td {
+    padding: 3px;
+    border-bottom: 1px solid #9f9f9f;
+}
+input[type=submit] {
+    border: 1px solid black;
+    background-color: transparent;
+    height: 30px;
+    width: max-content;
+    transition: all 0.3s ease-in-out;
+    cursor: pointer;
+}
+input[type=submit]:hover {
+    background-color: #adadad;
+}
