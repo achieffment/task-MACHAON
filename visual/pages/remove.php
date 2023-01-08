@@ -5,7 +5,7 @@
     }
 ?>
 <p>Введите номер ссылки, которую требуется удалить: </p>
-<form action="/" method="GET">
+<form action="<?=$redirectLink_visual?>" method="GET">
     <p>id: <input type="text" name="remove"></p>
     <p><input type="submit"></p>
 </form>

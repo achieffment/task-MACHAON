@@ -5,7 +5,7 @@
     }
 ?>
 <p>Введите ссылку для создания короткой: </p>
-<form action="/" method="POST">
+<form action="<?=$redirectLink_visual?>" method="POST">
     <p>Ссылка: <input type="text" name="link"></p>
     <p><input type="submit"></p>
 </form>

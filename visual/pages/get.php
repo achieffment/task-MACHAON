@@ -5,7 +5,7 @@
     }
 ?>
 <p>Введите короткую ссылку для получения полной: </p>
-<form action="/" method="GET">
+<form action="<?=$redirectLink_visual?>" method="GET">
     <p>Введите короткую ссылку: <input type="text" name="get"></p>
     <p><input type="submit"></p>
 </form>

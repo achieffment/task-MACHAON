@@ -5,7 +5,7 @@
     }
 ?>
 <p>Введите короткую ссылку и новое значение полной ссылки для неё: </p>
-<form action="/" method="GET">
+<form action="<?=$redirectLink_visual?>" method="GET">
     <p>Введите короткую ссылку: <input type="text" name="change"></p>
     <p>Введите новую ссылку: <input type="text" name="changeLink"></p>
     <p><input type="submit"></p>

@@ -1,12 +1,17 @@
 <?php
 
-class Auth
-{
+class Auth {
 
     public $response = [
         "status" => true,
         "message" => ""
     ];
+
+    public $authResponse = [
+        "status" => false,
+        "message" => ""
+    ];
+
     private $redirectLink;
 
     public function __construct($table_names, $db_conn, $redirectLink)
@@ -30,8 +35,22 @@ class Auth
             $this->setResponse(false, "Логин или пароль не верны");
     }
 
-    public function registry($login, $password)
-    {
+    public function checkToken($token) {
+        $token = $this->validate($token, "токен");
+        if ($token !== false) {
+            $query = "SELECT id FROM {$this->table_names["admins"]} WHERE token = '{$token}'";
+            $result = $this->db_conn->query($query);
+            if (!$result)
+                $this->setResponse(false, "Произошла ошибка базы данных при обработке запроса для проверки существования токена: " . $this->db_conn->error);
+            else if ($result->num_rows > 0) {
+                $this->setResponse(true);
+            } else
+                $this->setResponse(false, "Переданный токен не существует");
+        }
+        $this->setAuthResponse($this->response["status"], $this->response["message"]);
+    }
+
+    public function registry($login, $password, $auth = true) {
         $query = "SELECT id FROM {$this->table_names["admins"]} WHERE login = '{$login}'";
         $result = $this->db_conn->query($query);
         if (!$result)
@@ -39,15 +58,44 @@ class Auth
         else if ($result->num_rows > 0)
             $this->setResponse(false, "Такой логин уже используется!");
         else {
-            $query = "INSERT INTO {$this->table_names["admins"]} (`login`, `password`) VALUES('{$login}', '{$password}')";
+            $token = md5($login . $password);
+            $query = "INSERT INTO {$this->table_names["admins"]} (`login`, `password`, `token`) VALUES('{$login}', '{$password}', '{$token}')";
             $result = $this->db_conn->query($query);
             if ($result) {
-                $_SESSION["auth"] = $login;
-                $this->setResponse(true);
-                header("Location: " . $this->redirectLink);
+                if ($auth) {
+                    $_SESSION["auth"] = $login;
+                    $this->setResponse(true);
+                    header("Location: " . $this->redirectLink);
+                }
             } else {
                 $this->setResponse(false, "Произошла ошибка базы данных при обработке запроса для регистрации: " . $this->db_conn->error);
             }
+        }
+    }
+
+    public function deleteUser($userId)
+    {
+        $query = "SELECT login FROM {$this->table_names["admins"]} WHERE id = '{$userId}'";
+        $result = $this->db_conn->query($query);
+        if (!$result)
+            $this->setResponse(false, "Произошла ошибка базы данных при обработке запроса для проверки существования логина: " . $this->db_conn->error);
+        else {
+            if ($result->num_rows > 0) {
+                $login = $result->fetch_assoc();
+                print_r($login);
+                $query = "DELETE FROM {$this->table_names["admins"]} WHERE id = {$userId}";
+                $result = $this->db_conn->query($query);
+                if ($result) {
+                    $this->setResponse(true, "Пользователь успешно удален");
+                    if ($login && isset($login["login"]) && $login["login"] == $_SESSION["auth"]) {
+                        unset($_SESSION["auth"]);
+                        header("Location: " . $this->redirectLink);
+                    }
+                }
+                else
+                    $this->setResponse(false, "Произошла ошибка базы данных при обработке запроса удаления: " . $this->db_conn->error);
+            } else
+                $this->setResponse(false, "Не найден пользователь с заданным айди для удаления");
         }
     }
 
@@ -87,6 +135,11 @@ class Auth
         } else
             $this->setResponse(false, "Возникла ошибка при обработке запроса к бд: " . $this->db_conn->error);
         return false;
+    }
+
+    public function setAuthResponse($status, $message = "") {
+        $this->authResponse["status"] = $status;
+        $this->authResponse["message"] = $message;
     }
 
     public function setResponse($status, $message = "") {

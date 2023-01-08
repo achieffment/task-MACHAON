@@ -57,11 +57,23 @@
             $query = "CREATE TABLE {$table_admins_title} (
                     id INT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
                     login VARCHAR(32) UNIQUE NOT NULL,
-                    password VARCHAR(32) NOT NULL
+                    password VARCHAR(32) NOT NULL,
+                    token VARCHAR(32) UNIQUE NOT NULL
                 )";
             $result = $db_conn->query($query);
             if (!$result)
                 die("Problem with creating table {$table_names["admins"]}" . $db_conn->error);
+            else {
+                $login = "admin";
+                $password = md5("admin");
+                $token = md5($login . $password);
+                $query = "INSERT INTO {$table_admins_title} (`login`, `password`, `token`) VALUES('{$login}', '{$password}', '{$token}')";
+                $result = $db_conn->query($query);
+                if ($result)
+                    echo "<p>Успешно создан пользователь:<br>Логин:$login<br>Пароль:$password<br>Токен:$token</p>";
+                else
+                    echo "<p>Не удалось создать пользователя, рекомендуется сделать это по ссылке <a href='/visual/auth/?registry'>Регистрация</a></p>";
+            }
         }
         $table_links_title = str_replace("'", "", $table_names["links"]);
         if (!in_array($table_links_title, $tables)) {
@@ -75,3 +87,6 @@
                 die("Problem with creating table {$table_names["links"]}" . $db_conn->error);
         }
     }
+
+    echo "<p>База данных успешно создана</p>";
+    echo "<a href='/'>Вернуться</a>";
