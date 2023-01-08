@@ -8,8 +8,8 @@
     $rest_path .= "/rest/";
     $auth_path = "/visual/auth/";
 
-    $redirectLink_visual = "http" . (($_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/visual/";
-    $redirectLink_rest = "http" . (($_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/rest/";
+    $redirectLink_visual = "http" . ((isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/visual/";
+    $redirectLink_rest = "http" . ((isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/rest/";
 
     $db_hostname = "localhost";
     $db_login    = "root";

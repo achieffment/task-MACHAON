@@ -7,7 +7,7 @@ class TestRequests {
     public $headers = [];
 
     function __construct($url = "") {
-        $this->url = ($url) ? $url : "http" . (($_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/rest/";
+        $this->url = ($url) ? $url : "http" . ((isset($_SERVER["HTTPS"]) && $_SERVER["HTTPS"] == "on") ? "s" : "") . "://" . $_SERVER["HTTP_HOST"] . "/rest/";
         $this->headers[] = "Authorization: {$this->token}";
     }
 
